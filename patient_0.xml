@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<patient>
+    <concept name="pression_haute">
+        <output>0.5</output>
+    </concept>
+    <concept name="pression_basse">
+        <output>0.3</output>
+    </concept>
+    <concept name="duree_rampe">
+        <output>0.7</output>
+    </concept>
+    <concept name="temps_masque">
+        <output>0.2</output>
+    </concept>
+    <concept name="empreinte_masque">
+        <output>0.1</output>
+    </concept>
+    <concept name="humidificateur">
+        <output>0.1</output>
+    </concept>
+    <concept name="tuyau_chauffant">
+        <output>0.5</output>
+    </concept>
+</patient>
