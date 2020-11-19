@@ -47,6 +47,7 @@ public class ApnolabHardMode {
 			e.printStackTrace();
 		}
     	
+    	
         map = new CognitiveMap("Investments");
         map = test.get(0);
         
@@ -169,7 +170,11 @@ public class ApnolabHardMode {
         }
         
         System.out.println("Best values:");
-        System.out.println(best_ph + " --- " + best_pb + " --- " + best_dp + " --- " + best_dr +  " --- " + best_tm + ".");
+        System.out.println("pression_haute:" + best_ph);
+        System.out.println("pression_basse:" + best_pb);
+        System.out.println("differentiel_pression:" + best_dp);
+        System.out.println("duree_rampe:" + best_dr);
+        System.out.println("temps_masque:" + best_tm);
     	
     	
 
