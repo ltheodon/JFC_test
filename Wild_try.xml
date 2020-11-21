@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<patient>
+    <concept name="Rain">
+        <rmin>0.1</rmin>
+        <rmax>0.7</rmax>
+        <step>0.05</step>
+    </concept>
+    <concept name="Rangers">
+        <rmin>0.0</rmin>
+        <rmax>0.5</rmax>
+        <step>0.05</step>
+    </concept>
+    <cost name="Herbivores">
+        <weight>0.1</weight>
+    </cost>
+    <cost name="Predators">
+        <weight>0.1</weight>
+    </cost>
+    <cost name="Poachers">
+        <weight>-0.5</weight>
+    </cost>
+    <cost name="Grassland">
+        <weight>0.5</weight>
+    </cost>
+</patient>
