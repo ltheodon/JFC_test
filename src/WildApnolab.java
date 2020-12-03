@@ -50,7 +50,7 @@ public class WildApnolab {
 		}
         map = new CognitiveMap("WildApnolab");
         map = test.get(0);
-        runner = new SimpleFcmRunner(map, 0.01, 100000);
+        runner = new SimpleFcmRunner(map, 0.05, 100000);
         nf = NumberFormat.getNumberInstance(Locale.ENGLISH);
         nf.setMaximumFractionDigits(8);
     }
@@ -138,6 +138,7 @@ public class WildApnolab {
         		int r = i/tmp_tot % interList.get(name);
         		paramList.put(name,rminList.get(name) + r*stepList.get(name));
         		tmp_tot *= interList.get(name);
+        		System.out.print(rminList.get(name) + r*stepList.get(name) + " , ");
         	}
         	
         	// DO THE MAP!!§§§
@@ -168,6 +169,10 @@ public class WildApnolab {
             	resultat += costList.get(name)*out;
             	//System.out.print("resultat: " + resultat + "\n");
             }
+
+            //System.out.print(b + "   ");
+            System.out.print(resultat + "\n");
+            
             if (b & (resultat > top_resultat)){
             	top_resultat = resultat;
             	for (String name : nameList) {
