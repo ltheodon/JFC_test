@@ -16,8 +16,8 @@
     <cost name="Predators">
         <weight>0.1</weight>
     </cost>
-    <cost name="Black market price">
-        <weight>0.25</weight>
+    <cost name="Poachers">
+        <weight>0.2</weight>
     </cost>
     <cost name="Grassland">
         <weight>-0.25</weight>
