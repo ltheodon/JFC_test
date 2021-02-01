@@ -1,5 +1,8 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -11,12 +14,19 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.megadix.jfcm.CognitiveMap;
 import org.megadix.jfcm.Concept;
 import org.megadix.jfcm.utils.FcmIO;
 import org.megadix.jfcm.utils.FcmRunner;
 import org.megadix.jfcm.utils.SimpleFcmRunner;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,12 +40,11 @@ public class WildApnolabOpti2 {
     CognitiveMap map;
     NumberFormat nf;
 
-    public WildApnolabOpti2() throws Exception {
+    public WildApnolabOpti2(String fileName) throws Exception {
         //map = FcmIO.loadXml(getClass().getResourceAsStream("WildlifePark.fcm.xml")).get(0);
-    	String s = "WildApnolab.xml";
     	List<CognitiveMap> test = null;
     	try {
-			test = FcmIO.loadXml(s);
+			test = FcmIO.loadXml(fileName);
 		} catch (FileNotFoundException e) {
 			System.out.println("Success");
 			e.printStackTrace();
@@ -54,20 +63,23 @@ public class WildApnolabOpti2 {
 
     
     
-	public void test_scenario_1(double rain, double rangers) throws Exception {
+	public void run_opti(String fileName) throws Exception {
         
-        
+
+    	String fileSubName = fileName.replace(".xml", "_param.xml");
+    	fileSubName = fileSubName.replace(".XML", "_param.xml");
+    	String fileSubNameRes = fileSubName.replace("_param", "_results");
+    	
        	Map<String, Double> rminList = new HashMap<String, Double>();
     	Map<String, Double> rmaxList = new HashMap<String, Double>();
     	Map<String, Double> stepList = new HashMap<String, Double>();
     	Map<String, Double> costList = new HashMap<String, Double>();
-    	Map<String, Integer> interList = new HashMap<String, Integer>();
     	Map<String, Double> paramList = new HashMap<String, Double>();
     	List<String> nameList = new ArrayList<String>();
     	List<String> costNameList = new ArrayList<String>();
         
         try {
-            File fXmlFile = new File("Wild_try.xml");
+            File fXmlFile = new File(fileSubName);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -136,13 +148,12 @@ public class WildApnolabOpti2 {
         	bestParamList.put(name, 0.0);
         }
         
-        //System.out.print(fullValues.toString() + '\n');
         
 
         double top_resultat = 99999.0;
         double last_resultat = 99999.0;
         double temperature = 10000;
-        double coolingFactor = 100;
+        double coolingFactor = 10;
         double temperature_min = 0.1;
         double crop = 10;
         boolean b = false;
@@ -157,7 +168,6 @@ public class WildApnolabOpti2 {
         	
         	if((int)(t) == (int)((int)(t*crop/temperature)*temperature/crop) && t < temperature) {
         		reset = true;
-        		//System.out.print(t + "\n");
         	}
         	
         	
@@ -169,7 +179,6 @@ public class WildApnolabOpti2 {
             	int c_list_size = c_list.size();
             	int range = (int) (c_list_size*t/(temperature-temperature_min));
             	range = Math.max(range/2, 3);
-            	//int index = (int) (c_list.size() * Math.random());
             	int index = fullIndex.get(name) + (int) (range * Math.random()-(int)(range/2));
             	if(index < 0) {
             		index = (int)(-1*index/2);
@@ -177,17 +186,12 @@ public class WildApnolabOpti2 {
             	if(index > c_list_size-1) {
             		index = c_list_size-1 - (int)((index-c_list_size)/2);
             	}
-            	//index = Math.min(index, c_list_size-1);
-            	//index = Math.max(index, 0);
             	map.getConcepts().get(name).setOutput(c_list.get(index));
                 map.getConcepts().get(name).setFixedOutput(true);
                 paramList.put(name,c_list.get(index));
                 key = key + Integer.toString(index);
                 fullIndex.put(name, index);
                 tmp_x = c_list.get(index);
-                //System.out.print((int) (3 * Math.random())-1 + "\n");
-                //System.out.print(name + ": " + index + "\n");
-                //System.out.print(c_list.get(index) + " , ");
             }
             
             double resultat = 99999.0;
@@ -212,21 +216,10 @@ public class WildApnolabOpti2 {
                 	bestIndex.put(name, fullIndex.get(name));
                  }
             }
-            //System.out.print("t: " + t + "   -   E: " + Util.probability(resultat, last_resultat, t) + "\n");
             if (Math.random() < Util.probability(resultat, last_resultat, t)) {
             	last_resultat = resultat;
             }
             
-            //System.out.print(resultat + "\n");
-            
-            /*if(b) {
-            	//System.out.print(t + " ," + tmp_x + " ," + resultat + "\n");
-            	System.out.print(t + " ,");
-            	for (String name : nameList) {
-            		System.out.print(paramList.get(name) + " ,");
-            	}
-            	System.out.print(resultat + "\n");
-            }*/
             
 
         }
@@ -245,11 +238,74 @@ public class WildApnolabOpti2 {
         
         
         
+        // Ecriture des resultats
+		try {
+
+			DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
+
+			DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+
+			Document document = documentBuilder.newDocument();
+
+			Element root = document.createElement("patient");
+			document.appendChild(root);
+
+
+	        for (String name : nameList) {
+	        	System.out.print(name + ":" + bestParamList.get(name) + "\n");
+				Element concept = document.createElement("concept");
+				root.appendChild(concept);
+				Attr attr = document.createAttribute("name");
+				attr.setValue(name);
+				concept.setAttributeNode(attr);
+				
+
+				Element bestValue = document.createElement("value");
+				bestValue.appendChild(document.createTextNode(bestParamList.get(name).toString()));
+				concept.appendChild(bestValue);
+	        }
+			
+
+			Element topResultat = document.createElement("best_cost");
+			topResultat.appendChild(document.createTextNode(Double.toString(top_resultat)));
+			root.appendChild(topResultat);
+
+
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource domSource = new DOMSource(document);
+			StreamResult streamResult = new StreamResult(new File(fileSubNameRes));
+
+			transformer.transform(domSource, streamResult);
+
+			System.out.println("Fichier XML (" + fileSubNameRes + ") créé.");
+
+		} catch (ParserConfigurationException pce) {
+			pce.printStackTrace();
+		} catch (TransformerException tfe) {
+			tfe.printStackTrace();
+		}
         
         
         
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        // Force brute
+        
+        
+        
+        /*
         
         int nb_iter = 1;
         int nb_inter = 0;
@@ -263,6 +319,7 @@ public class WildApnolabOpti2 {
         	nb_iter *= nb_inter;
             //System.out.print(nb_inter + "\n");
         }
+        
         
         
         
@@ -318,9 +375,6 @@ public class WildApnolabOpti2 {
                 }
             }
             
-            /*if(b) {
-            	System.out.print(tmp_x + " ," + resultat + "\n");
-            }*/
         	
         	
             
@@ -342,22 +396,9 @@ public class WildApnolabOpti2 {
         double erreur = Math.abs(top_resultat2-top_resultat)/Math.abs(top_resultat2);
         
         //System.out.print(nb_iter + ", " +  time1 + ", " + time2 + ", " + erreur + "\n");
-        
+        */
     }
 
-
-    public void run() {
-        try {
-            //System.out.print("Scenario\tConverged\t");
-            //ExampleUtils.printMapHeader(map, "\t");
-
-            test_scenario_1(0.1,0.1);
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
 
     void resetMap() {
     	Iterator<Concept> iter = map.getConceptsIterator();
@@ -367,24 +408,23 @@ public class WildApnolabOpti2 {
             concept.setPrevOutput(null);
             concept.setFixedOutput(false);
         }
-        map.getConcepts().get("Rain").setOutput(0.1);
+        /*map.getConcepts().get("Rain").setOutput(0.1);
         map.getConcepts().get("Rangers").setOutput(0.1);
         map.getConcepts().get("Grassland").setOutput(0.1);
         map.getConcepts().get("Poachers").setOutput(0.0);
         map.getConcepts().get("Herbivores").setOutput(0.25);
-        map.getConcepts().get("Predators").setOutput(0.0);
+        map.getConcepts().get("Predators").setOutput(0.0);*/
     }
 
-    void showResults(String scenario, boolean converged) {
-        //System.out.print(scenario + "\t" + converged + "\t");
-        //ExampleUtils.printMapState(map, "\t", nf);
-    }
-
-    public static void main(String[] args) {
-        WildApnolabOpti2 example;
+    public static void main(String[] args) throws IOException {
+        WildApnolabOpti2 Opti;
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(System.in));
+        String fileName = reader.readLine();
+        System.out.println("Loading " + fileName + " ...");  
         try {
-            example = new WildApnolabOpti2();
-            example.run();
+        	Opti = new WildApnolabOpti2(fileName);
+        	Opti.run_opti(fileName);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

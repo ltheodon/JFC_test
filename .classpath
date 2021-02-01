@@ -7,6 +7,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/Users/leoth/Documents/Année 2020-2021/EMSE/PI/code/jfcm-core-1.4.2/jfcm-core-1.4.2.jar"/>
-	<classpathentry kind="lib" path="D:/Users/leoth/Documents/Année 2020-2021/EMSE/PI/Eclipse/JFC_test/jar/cmaes_java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
