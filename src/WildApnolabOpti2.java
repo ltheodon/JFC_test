@@ -399,7 +399,7 @@ public class WildApnolabOpti2 {
         */
     }
 
-
+it
     void resetMap() {
     	Iterator<Concept> iter = map.getConceptsIterator();
         while (iter.hasNext()) {
